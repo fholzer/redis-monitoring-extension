@@ -95,9 +95,15 @@ public class InfoMetrics implements Runnable {
         for(Map.Entry entry : infoMap.entrySet()) {
             String sectionName = entry.getKey().toString();
             List<Map<String, ?>> metricsInSectionConfig = (List<Map<String,?>>) entry.getValue();
-            Map<String, String> sectionInfoMap = infoMapExtractor.extractInfoAsHashMap(info, sectionName);
-            CommonMetricsModifier commonMetricsModifier = new CommonMetricsModifier(metricsInSectionConfig, sectionInfoMap, metricPrefix, sectionName);
-            finalMetricList.addAll(commonMetricsModifier.metricBuilder());
+
+            if(sectionName.equalsIgnoreCase("Commandstats")){
+                DynamicMetricsModifier dynamicMetricsModifier = new DynamicMetricsModifier(jedisPool, metricPrefix, sectionName, metricsInSectionConfig);
+                finalMetricList.addAll(dynamicMetricsModifier.getMetricsList());
+            }else {
+                Map<String, String> sectionInfoMap = infoMapExtractor.extractInfoAsHashMap(info, sectionName);
+                CommonMetricsModifier commonMetricsModifier = new CommonMetricsModifier(metricsInSectionConfig, sectionInfoMap, metricPrefix, sectionName);
+                finalMetricList.addAll(commonMetricsModifier.metricBuilder());
+            }
         }
         return finalMetricList;
     }
